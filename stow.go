@@ -13,6 +13,7 @@ type Config struct {
 	TargetDir string
 	Verbose   bool
 	DryRun    bool
+	Force     bool
 }
 
 func (c *Config) log(format string, args ...any) {
@@ -90,6 +91,15 @@ func stowDirEntry(cfg *Config, srcPath, tgtPath string) error {
 	}
 
 	cfg.warn("%s exists as a file, expected directory — skipping", tgtPath)
+	if cfg.Force {
+		cfg.log("force: removing %s", tgtPath)
+		if !cfg.DryRun {
+			if err := forceRemove(tgtPath, info); err != nil {
+				return fmt.Errorf("force remove %s: %w", tgtPath, err)
+			}
+			return createDirLink(srcPath, tgtPath)
+		}
+	}
 	return nil
 }
 
@@ -120,7 +130,24 @@ func stowFileEntry(cfg *Config, srcPath, tgtPath string) error {
 	}
 
 	cfg.warn("%s already exists and is not a symlink — skipping", tgtPath)
+	if cfg.Force {
+		cfg.log("force: removing %s", tgtPath)
+		if !cfg.DryRun {
+			if err := forceRemove(tgtPath, info); err != nil {
+				return fmt.Errorf("force remove %s: %w", tgtPath, err)
+			}
+			return os.Symlink(srcPath, tgtPath)
+		}
+	}
 	return nil
+}
+
+// forceRemove removes a real (non-symlink) file or directory to make way for a symlink.
+func forceRemove(tgtPath string, info os.FileInfo) error {
+	if info.IsDir() {
+		return os.RemoveAll(tgtPath)
+	}
+	return os.Remove(tgtPath)
 }
 
 // Unstow removes symlinks in the target directory that point into the package.

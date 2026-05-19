@@ -16,6 +16,7 @@ func main() {
 		target  string
 		verbose bool
 		dryRun  bool
+		force   bool
 		ver     bool
 	)
 
@@ -24,6 +25,7 @@ func main() {
 	flag.StringVar(&target, "t", "", "Target directory (default: parent of stow dir)")
 	flag.BoolVar(&verbose, "v", false, "Verbose output")
 	flag.BoolVar(&dryRun, "n", false, "Dry run — show actions without performing them")
+	flag.BoolVar(&force, "f", false, "Force — overwrite existing real files/dirs blocking symlinks")
 	flag.BoolVar(&ver, "version", false, "Print version and exit")
 	flag.Parse()
 
@@ -59,6 +61,7 @@ func main() {
 		TargetDir: targetDir,
 		Verbose:   verbose,
 		DryRun:    dryRun,
+		Force:     force,
 	}
 
 	if verbose || dryRun {
