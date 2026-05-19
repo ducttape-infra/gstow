@@ -1,4 +1,7 @@
-# gstow
+gstow - my dotfiles and config stow
+===================================
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gbraad-dotfiles/gstow)
 
 A cross-platform reimplementation of [GNU stow](https://www.gnu.org/software/stow/) in Go.
 
