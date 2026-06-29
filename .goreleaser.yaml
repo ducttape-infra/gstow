@@ -1,0 +1,62 @@
+version: 2
+
+project_name: gstow
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: gstow
+    main: ./cmd/gstow
+    binary: gstow
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{ .Version }} -X main.commit={{ .Commit }}
+
+archives:
+  - id: binary
+    format: binary
+    name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+
+nfpms:
+  - id: packages
+    package_name: gstow
+    file_name_template: "{{ .ConventionalFileName }}"
+    vendor: Ducttape Infra
+    homepage: https://github.com/ducttape-infra/gstow
+    maintainer: Ducttape Infra <developers@ducttape-infra.org>
+    description: |-
+      Manage symlink farms for dotfiles.
+      GNU Stow-compatible symlink manager with support for Windows junctions.
+    license: MIT
+    formats:
+      - apk
+      - deb
+      - rpm
+    bindir: /usr/sbin
+    contents:
+      - src: ./LICENSE
+        dst: /usr/share/licenses/gstow/LICENSE
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
